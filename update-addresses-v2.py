@@ -18,23 +18,35 @@ url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
 
 # Function to refine the business name using GPT-3
 def refine_name_with_gpt3(name):
-    response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
-      messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"This is a business name and may contain additional notes and emoji: '{name}'. Please attempt to return only the name of the business and nothing else in your response. "}
-        ]
-    )
-
-    return response['choices'][0]['message']['content']
+    max_attempts = 3  # Set the maximum number of attempts here
+    for attempt in range(max_attempts):
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": f"This is a business name and may contain additional notes and emoji: '{name}'. Please attempt to return only the name of the business and nothing else in your response. "}
+                ]
+            )
+            return response['choices'][0]['message']['content']
+        except Exception as e:
+            print(f"Exception occurred: {e}")
+            if attempt < max_attempts - 1:  # Don't sleep on the last attempt
+                print(f"Sleeping for 2 seconds before retrying...")
+                time.sleep(2)
+            else:
+                print("Max attempts reached. Returning original name.")
+                return name
 
 # Function to get place information from Google
 def get_place_info(place_name):
     # Set up the parameters for the request
+    # locationbias centers the request on a specific lat/long pair
     params = {
         "input": place_name + " New York, NY",
         "inputtype": "textquery",
         "fields": "name,formatted_address,geometry,place_id",
+        "locationbias": "circle:radius@40.731300,-73.989502",
         "key": google_api_key
     }
 
