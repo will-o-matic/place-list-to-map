@@ -14,7 +14,7 @@ openai.api_key = keys["openai_key"]
 google_api_key = keys["google_key"]
 
 # Google Places API URL
-url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 
 # Function to refine the business name using GPT-3
 def refine_name_with_gpt3(name):
@@ -43,10 +43,9 @@ def get_place_info(place_name):
     # Set up the parameters for the request
     # locationbias centers the request on a specific lat/long pair
     params = {
-        "input": place_name + " New York, NY",
-        "inputtype": "textquery",
-        "fields": "name,formatted_address,geometry,place_id",
-        "locationbias": "circle:radius@40.731300,-73.989502",
+        "query": place_name,
+        "location": "40.731300,-73.989502",
+        "radius": 1000,
         "key": google_api_key
     }
 
@@ -56,18 +55,22 @@ def get_place_info(place_name):
     # Parse the response
     data = response.json()
 
+    place_info = []
     if data['status'] == 'OK':
-        name = data['candidates'][0]['name']
-        address = data['candidates'][0]['formatted_address']
-        lat = data['candidates'][0]['geometry']['location']['lat']
-        lng = data['candidates'][0]['geometry']['location']['lng']
-        place_id = data['candidates'][0]['place_id']
+        for candidate in data['results']:
+            name = candidate['name']
+            address = candidate['formatted_address']
+            lat = candidate['geometry']['location']['lat']
+            lng = candidate['geometry']['location']['lng']
+            place_id = candidate['place_id']
 
-        maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
+            maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
 
-        return name, address, lat, lng, maps_url
+            place_info.append((name, address, lat, lng, maps_url))
     else:
-        return place_name, "", "", "", ""
+        place_info.append((place_name, "", "", "", ""))
+
+    return place_info
 
 # Read from the text file
 with open('businesses.txt', 'r', encoding='utf-8') as infile:
@@ -83,5 +86,6 @@ with open('business_info.csv', 'w', newline='', encoding='utf-8') as outfile:
         notes_emoji = re.search(r"([\w\s]*)(.*)", business).group(2).strip()
         time.sleep(1)
         refined_name = refine_name_with_gpt3(business_name)
-        name, address, lat, lng, maps_url = get_place_info(refined_name)
-        writer.writerow([name, notes_emoji, address, lat, lng, maps_url])
+        places_info = get_place_info(refined_name)
+        for name, address, lat, lng, maps_url in places_info:
+            writer.writerow([name, notes_emoji, address, lat, lng, maps_url])
