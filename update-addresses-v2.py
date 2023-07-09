@@ -14,7 +14,7 @@ openai.api_key = keys["openai_key"]
 google_api_key = keys["google_key"]
 
 # Google Places API URL
-url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 
 # Function to refine the business name using GPT-3
 def refine_name_with_gpt3(name):
@@ -89,9 +89,9 @@ def get_place_info(place_name):
     # Set up the parameters for the request
     # locationbias centers the request on a specific lat/long pair
     params = {
-        "query": place_name,
+        "keyword": place_name,
         "location": "40.731300,-73.989502",
-        "radius": 1000,
+        "rankby": "distance",
         "key": google_api_key
     }
 
@@ -105,7 +105,7 @@ def get_place_info(place_name):
     if data['status'] == 'OK':
         for candidate in data['results']:
             name = candidate['name']
-            address = candidate['formatted_address']
+            address = candidate['vicinity']
             lat = candidate['geometry']['location']['lat']
             lng = candidate['geometry']['location']['lng']
             place_id = candidate['place_id']
@@ -113,7 +113,8 @@ def get_place_info(place_name):
 
             maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
 
-            place_info.append((name, address, status, lat, lng, maps_url))
+            if status == "OPERATIONAL":
+                place_info.append((name, address, status, lat, lng, maps_url))
     else:
         place_info.append((place_name, "", "", "", "", ""))
 
