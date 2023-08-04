@@ -157,6 +157,8 @@ business_info.txt
 Businesses.txt
 get-addresses.py
 update-addresses.py
+output.kml
 Google Maps Export/doc.kml
 .gitignore
 Working Files/*
+KMZBaseDirectory/*
