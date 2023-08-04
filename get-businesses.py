@@ -5,6 +5,12 @@ import re
 import openai
 import time 
 import json
+import argparse 
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description="Get Addresses for businesses in NYC")
+parser.add_argument('filename', type=str, help='Path to the file containing business names')
+args = parser.parse_args() 
 
 # Load secret keys from a JSON file
 with open('secrets.json') as f:
@@ -124,7 +130,7 @@ def get_place_info(place_name):
     return place_info
 
 # Read from the text file
-with open('NYC Things To Do.txt', 'r', encoding='utf-8') as infile:
+with open(args.filename, 'r', encoding='utf-8') as infile:
     businesses = infile.read().splitlines()
 
 # Write to the CSV file
