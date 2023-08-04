@@ -157,3 +157,6 @@ business_info.txt
 Businesses.txt
 get-addresses.py
 update-addresses.py
+Google Maps Export/doc.kml
+.gitignore
+Working Files/*

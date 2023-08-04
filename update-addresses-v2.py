@@ -85,6 +85,7 @@ def refine_name_with_gpt3(name):
                 return name
 
 # Function to get place information from Google
+# Function to get place information from Google
 def get_place_info(place_name):
     # Set up the parameters for the request
     # locationbias centers the request on a specific lat/long pair
@@ -103,7 +104,9 @@ def get_place_info(place_name):
 
     place_info = []
     if data['status'] == 'OK':
-        for candidate in data['results']:
+        for i, candidate in enumerate(data['results']):
+            if i >= 3:  # Limit to the first 3 results
+                break
             name = candidate['name']
             address = candidate['vicinity']
             lat = candidate['geometry']['location']['lat']
@@ -114,20 +117,20 @@ def get_place_info(place_name):
             maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
 
             if status == "OPERATIONAL":
-                place_info.append((name, address, status, lat, lng, maps_url))
+                place_info.append((name, address, lat, lng, maps_url))
     else:
-        place_info.append((place_name, "", "", "", "", ""))
+        place_info.append((place_name, "", "", "", ""))
 
     return place_info
 
 # Read from the text file
-with open('businesses.txt', 'r', encoding='utf-8') as infile:
+with open('NYC Things To Do.txt', 'r', encoding='utf-8') as infile:
     businesses = infile.read().splitlines()
 
 # Write to the CSV file
 with open('business_info.csv', 'w', newline='', encoding='utf-8') as outfile:
     writer = csv.writer(outfile)
-    writer.writerow(['business_name', 'refined_name_gpt', 'notes/emoji', 'address', 'status', 'latitude', 'longitude', 'Google Maps URL'])
+    writer.writerow(['business_name', 'refined_name_gpt', 'notes/emoji', 'address', 'latitude', 'longitude', 'Google Maps URL'])
 
     for business in businesses:
         business_name = re.search(r"([\w\s]*)(.*)", business).group(1).strip()
@@ -135,5 +138,5 @@ with open('business_info.csv', 'w', newline='', encoding='utf-8') as outfile:
         time.sleep(1)
         refined_name = refine_name_with_gpt3(business)
         places_info = get_place_info(refined_name)
-        for name, address, status, lat, lng, maps_url in places_info:
-            writer.writerow([name, refined_name, notes_emoji, status, address, lat, lng, maps_url])
+        for name, address, lat, lng, maps_url in places_info:
+            writer.writerow([name, refined_name, notes_emoji, address, lat, lng, maps_url])

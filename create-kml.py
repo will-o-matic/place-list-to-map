@@ -11,16 +11,17 @@ def prettify(elem):
 def create_kml_file(csv_file_path, output_kml_file_path):
     # Create a mapping of emoji to style URLs
     emoji_style_mapping = {
-        "🍕": "#icon-pizza",
-        "🍽️": "#icon-dinner",
-        "🍪": "#icon-dessert",
-        "🍨": "#icon-dessert",
-        "🧁": "#icon-dessert",
-        "🍸": "#icon-martini",
-        "🏃‍♀️": "#icon-fast",
-        "☕️": "#icon-coffee",
-        "🥯": "#icon-bagel",
-        "🥐": "#icon-bakery",
+        "🍕": "#icon-1651-F57C00-nodesc-normal",
+        "🍽️": "#icon-1577-F57C00-nodesc-normal",
+        "🥦": "#icon-1577-F57C00-nodesc-normal",
+        "🍪": "#icon-1607-FFEA00-nodesc-normal",
+        "🍨": "#icon-1607-FFEA00-nodesc-normal",
+        "🧁": "#icon-1607-FFEA00-nodesc-normal",
+        "🍸": "#icon-1517-9C27B0-nodesc-normal",
+        "🏃‍♀️": "#icon-1567-F57C00-nodesc-normal",
+        "☕️": "#icon-1534-9C27B0-nodesc-normal",
+        "🥯": "#icon-ci-12-nodesc-normal",
+        "🥐": "#icon-ci-9-nodesc-normal",
     }
 
     # Create root element and add document element
@@ -43,7 +44,7 @@ def create_kml_file(csv_file_path, output_kml_file_path):
             # Find matching styleUrl for the emoji in the name
             style_url = None
             for emoji, url in emoji_style_mapping.items():
-                if emoji in row['notes_emoji']:
+                if emoji in row['notes/emoji']:
                     style_url = url
                     break
 
@@ -51,7 +52,7 @@ def create_kml_file(csv_file_path, output_kml_file_path):
             placemark = SubElement(doc, 'Placemark')
 
             # Add name
-            SubElement(placemark, 'name').text = row['business_name'] + ' ' + row['notes_emoji']
+            SubElement(placemark, 'name').text = row['business_name'] + ' ' + row['notes/emoji']
 
             # Add styleUrl if found
             if style_url:
